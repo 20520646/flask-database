@@ -18,6 +18,7 @@ GiangVien_collection = database["GiangVien"]
 PhuHuynh_collection = database["PhuHuynh"]
 
 
+
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb+srv://20520646:20520646@cluster0.ukwx1ww.mongodb.net/"
 mongo = PyMongo(app)
@@ -87,7 +88,7 @@ def login_account():
                     mimetype='application/json'
                 )
         for gv in GiangVien_collection.find():
-            if sv["TenDN"] == username and sv["MK"] == password:
+            if gv["TenDN"] == username and gv["MK"] == password:
                 converted = json_util.dumps({"isCorrect":True,
                                              "typeAccount":"gv"})
                 return app.response_class(
@@ -96,7 +97,7 @@ def login_account():
                     mimetype='application/json'
                 )
         for ph in PhuHuynh_collection.find():
-            if sv["TenDN"] == username and sv["MK"] == password:
+            if ph["TenDN"] == username and ph["MK"] == password:
                 converted = json_util.dumps({"isCorrect":True,
                                              "typeAccount":"ph"})
                 return app.response_class(
