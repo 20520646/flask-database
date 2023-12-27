@@ -21,7 +21,7 @@ GiangVien_collection = database["GiangVien"]
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb+srv://20520646:20520646@cluster0.ukwx1ww.mongodb.net/"
 mongo = PyMongo(app)
-
+CORS(app)
 @app.route('/')
 def home():
     return "Kinh Khung's database"
@@ -73,18 +73,26 @@ def register_account():
 
 @app.route('/login',methods= ['GET','POST'])    
 def login_account():
-    TenDN = request.form.get('id')
-    MK = request.form.get('password')    
-    for sv in SinhVien_collection:
-        if sv["TenDN"] == TenDN and sv["MK"] == MK:
-            return "Dang Nhap Duoc"
-            # return json.dumps({
-            #     "isCorrect":True
-            # })
-    return "Khong dang nhap"
-    # return json.dumps({
-    #             "isCorrect":False
-    #         })   
+    data = request.get_json()
+    username = data.get('id')
+    password = data.get('password')
+    if username and password :
+        for sv in SinhVien_collection.find():
+            if sv["TenDN"] == username and sv["MK"] == password:
+                converted = json_util.dumps({"isCorrect":True})
+                return app.response_class(
+                    response=converted,
+                    status=200,
+                    mimetype='application/json'
+                )
+    converted = json_util.dumps({"isCorrect":False}) 
+    return app.response_class(
+        response=converted,
+        status=200,
+        mimetype='application/json'
+    )
+    return jsonify({'success': False, 'message': 'Đăng nhập không thành công'})
+    
 if __name__ == "__main__":
-    app.run(debug= True, host = "0.0.0.0")
+    app.run(debug=True, host = "0.0.0.0")
 
