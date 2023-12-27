@@ -77,12 +77,14 @@ def login_account():
     MK = request.form.get('')    
     for sv in SinhVien_collection:
         if sv["TenDN"] == TenDN and sv["MK"] == MK:
-            return json.dumps({
-                "isCorrect":True
-            })
-    return json.dumps({
-                "isCorrect":False
-            })   
+            return "Dang Nhap Duoc"
+            # return json.dumps({
+            #     "isCorrect":True
+            # })
+    return "Khong dang nhap"
+    # return json.dumps({
+    #             "isCorrect":False
+    #         })   
 if __name__ == "__main__":
     app.run(debug= True, host = "0.0.0.0")
 
