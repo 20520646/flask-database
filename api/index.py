@@ -15,7 +15,7 @@ MonHoc_collection = database["MonHoc"]
 BuoiHoc_collection = database["BuoiHoc"]
 LopMonHoc_collection = database["LopMonHoc"]
 GiangVien_collection = database["GiangVien"]
-
+PhuHuynh_collection = database["PhuHuynh"]
 
 
 app = Flask(__name__)
@@ -79,7 +79,26 @@ def login_account():
     if username and password :
         for sv in SinhVien_collection.find():
             if sv["TenDN"] == username and sv["MK"] == password:
-                converted = json_util.dumps({"isCorrect":True})
+                converted = json_util.dumps({"isCorrect":True,
+                                             "typeAccount":"sv"})
+                return app.response_class(
+                    response=converted,
+                    status=200,
+                    mimetype='application/json'
+                )
+        for gv in GiangVien_collection.find():
+            if sv["TenDN"] == username and sv["MK"] == password:
+                converted = json_util.dumps({"isCorrect":True,
+                                             "typeAccount":"gv"})
+                return app.response_class(
+                    response=converted,
+                    status=200,
+                    mimetype='application/json'
+                )
+        for ph in PhuHuynh_collection.find():
+            if sv["TenDN"] == username and sv["MK"] == password:
+                converted = json_util.dumps({"isCorrect":True,
+                                             "typeAccount":"ph"})
                 return app.response_class(
                     response=converted,
                     status=200,
