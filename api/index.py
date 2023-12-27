@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from bson import json_util
@@ -66,6 +66,23 @@ def get_date(date):
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/register',methods= ['GET','POST'])    
+def register_account():
+    pass
+
+@app.route('/login',methods= ['GET','POST'])    
+def login_account():
+    TenDN = request.form.get('')
+    MK = request.form.get('')    
+    for sv in SinhVien_collection:
+        if sv["TenDN"] == TenDN and sv["MK"] == MK:
+            return json.dumps({
+                "isCorrect":True
+            })
+    return json.dumps({
+                "isCorrect":False
+            })   
 if __name__ == "__main__":
-    app.run(debug= True)
-    
+    app.run(debug= True, host = "0.0.0.0")
+
