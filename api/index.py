@@ -73,14 +73,14 @@ def register_account():
 
 @app.route('/login',methods= ['GET','POST'])    
 def login_account():
-    # TenDN = request.form.get('')
-    # MK = request.form.get('')    
-    # for sv in SinhVien_collection:
-    #     if sv["TenDN"] == TenDN and sv["MK"] == MK:
-    #         return "Dang Nhap Duoc"
-    #         # return json.dumps({
-    #         #     "isCorrect":True
-    #         # })
+    TenDN = request.form.get('id')
+    MK = request.form.get('password')    
+    for sv in SinhVien_collection:
+        if sv["TenDN"] == TenDN and sv["MK"] == MK:
+            return "Dang Nhap Duoc"
+            # return json.dumps({
+            #     "isCorrect":True
+            # })
     return "Khong dang nhap"
     # return json.dumps({
     #             "isCorrect":False
