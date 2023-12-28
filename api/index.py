@@ -37,6 +37,7 @@ def get_students(MaSV):
             if lmh["MaGV"] == gv["MaGv"]:
                 all_Lopmonhoc.append({
                     "LopMonHoc":lmh["MaLMH"],
+                    "TenMonHoc":lmh["TenLMH"],
                     "TenGiangVien":gv["TenGV"]
                 })
     converted = json_util.dumps({"TenSV":name,
