@@ -36,15 +36,16 @@ def get_student(MaSV):
         mimetype='application/json'
     )
     
-@app.route('/monhoc',methods= ['GET','POST'])
-def get_monhoc():
-    all_monhoc = list(MonHoc_collection.find())
-    converted_students = json_util.dumps(all_monhoc)
-    return app.response_class(
-        response=converted_students,
-        status=200,
-        mimetype='application/json'
-    )
+@app.route('/monhoc/<MaSV>',methods= ['GET','POST'])
+def get_monhoc(MaSV):
+    if SinhVien_collection.find({"MaSV":MaSV}):
+        all_monhoc = list(MonHoc_collection.find())
+        converted_students = json_util.dumps(all_monhoc)
+        return app.response_class(
+            response=converted_students,
+            status=200,
+            mimetype='application/json'
+        )
 
     
 @app.route('/date/<date>',methods= ['GET','POST'])
