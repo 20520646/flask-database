@@ -27,6 +27,7 @@ CORS(app)
 def welcome():
     return "Kinh Khung's database"
 
+
 @app.route('/home/<MaSV>',methods= ['GET','POST'])
 def get_students(MaSV):
     all_Lopmonhoc =[]
@@ -68,6 +69,17 @@ def get_monhoc(MaSV):
             mimetype='application/json'
         )
 
+@app.route('/monhoc/<MaSV>/<MaLMH>',methods= ['GET','POST'])
+def get_lopmonhoc(MaSV,MaLMH):
+    if SinhVien_collection.find({"MaSV":MaSV}):
+        if LopMonHoc_collection.find({"MaLMH":MaLMH}):
+            all_Lopmonhoc = LopMonHoc_collection.find({"MaLMH":MaLMH})
+        converted_students = json_util.dumps(all_Lopmonhoc)
+        return app.response_class(
+            response=converted_students,
+            status=200,
+            mimetype='application/json'
+        )
     
 @app.route('/date/<date>',methods= ['GET','POST'])
 def get_date(date):
