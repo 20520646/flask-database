@@ -24,8 +24,21 @@ app.config["MONGO_URI"] = "mongodb+srv://20520646:20520646@cluster0.ukwx1ww.mong
 mongo = PyMongo(app)
 CORS(app)
 @app.route('/')
-def home():
+def welcome():
     return "Kinh Khung's database"
+
+@app.route('/home/<MaSV>',methods= ['GET','POST'])
+def get_students(MaSV):
+    mssv = SinhVien_collection.find({"MaSV":MaSV})
+    name = [st["TenSV"] for st in mssv]
+    all_monhoc = list(MonHoc_collection.find())
+    converted = json_util.dumps({"TenSV":name,
+                                "MonHoc":all_monhoc})
+    return app.response_class(
+        response=converted,
+        status=200,
+        mimetype='application/json'
+    )    
 @app.route('/students/<MaSV>',methods= ['GET','POST'])
 def get_student(MaSV):
     all_students = list(SinhVien_collection.find({"MaSV":MaSV}))
