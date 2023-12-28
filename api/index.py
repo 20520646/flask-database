@@ -29,11 +29,18 @@ def welcome():
 
 @app.route('/home/<MaSV>',methods= ['GET','POST'])
 def get_students(MaSV):
+    all_Lopmonhoc =[]
     mssv = SinhVien_collection.find({"MaSV":MaSV})
     name = [st["TenSV"] for st in mssv]
-    all_monhoc = list(MonHoc_collection.find())
+    for lmh in LopMonHoc_collection.find():
+        for gv in GiangVien_collection.find():
+            if lmh["MaGV"] == gv["MaGv"]:
+                all_Lopmonhoc.append({
+                    "LopMonHoc":lmh["MaLMH"],
+                    "TenGiangVien":gv["TenGV"]
+                })
     converted = json_util.dumps({"TenSV":name,
-                                "MonHoc":all_monhoc})
+                                "MonHoc":all_Lopmonhoc})
     return app.response_class(
         response=converted,
         status=200,
