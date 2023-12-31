@@ -57,7 +57,15 @@ def get_student(MaSV):
         status=200,
         mimetype='application/json'
     )
-    
+@app.route('/giangvien/<MaGV>',methods= ['GET','POST'])
+def get_giangvien(MaGV):
+    giangvien_all = list(GiangVien_collection.find({"MaGv":MaGV}))
+    converted_students = json_util.dumps(giangvien_all)
+    return app.response_class(
+        response=converted_students,
+        status=200,
+        mimetype='application/json'
+    )    
 @app.route('/monhoc/<MaSV>',methods= ['GET','POST'])
 def get_monhoc(MaSV):
     if SinhVien_collection.find({"MaSV":MaSV}):
@@ -80,7 +88,41 @@ def get_lopmonhoc(MaSV,MaLMH):
             status=200,
             mimetype='application/json'
         )
-    
+@app.route('/phuhuynh/<MaPH>/',methods= ['GET','POST'])
+def get_phuhuynh(MaPH):
+    if PhuHuynh_collection.find({"MaPH":MaPH}):
+        if SinhVien_collection.find({"MaSV":ph["MaSV"] for ph in PhuHuynh_collection.find()}):
+            all_Phuhuynh = PhuHuynh_collection.find({"MaPH":MaPH})
+            all_Phuhuynhs = PhuHuynh_collection.find({"MaPH":MaPH})
+            for ph in all_Phuhuynhs:
+                MaSVs = ph["MaSV"]
+            all_sinhvien = SinhVien_collection.find({"MaSV":MaSVs})
+            for sv in all_sinhvien:
+                _id = sv["_id"]
+                MaSV = sv["MaSV"]
+                TenSV = sv["TenSV"]
+                GioiTinh = sv["GioiTinh"]
+                NoiSinh = sv["NoiSinh"]
+                DiaChi = sv["Dia Chi"]
+                TenDN = sv["TenDN"]
+                mk = sv["MK"]
+        converted_students = json_util.dumps({"PhuHuynh":all_Phuhuynh,
+                                              "SinhVien":{
+                                                 "_id":_id,
+                                                 "MaSV":MaSV,
+                                                 "TenSV": TenSV,
+                                                 "GioiTinh": GioiTinh,
+                                                 "NoiSinh": NoiSinh,
+                                                 "DiaChi":DiaChi,
+                                                 "TenDN":TenDN,
+                                                 "MK":mk
+                                            }
+                                             })
+        return app.response_class(
+            response=converted_students,
+            status=200,
+            mimetype='application/json'
+        )   
 @app.route('/date/<date>',methods= ['GET','POST'])
 def get_date(date):
     try:
