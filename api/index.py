@@ -5,6 +5,12 @@ from bson import json_util
 from flask_cors import CORS
 from datetime import datetime,timedelta
 import json
+from numpy import load
+from sklearn.preprocessing import LabelEncoder, Normalizer
+import pickle
+from make_embeddings import get_embeddings
+from extract_faces import extract_face
+from firebase1 import get_firebase
 # Kết nối đến MongoDB (mặc định là localhost, port 27017)
 client = MongoClient('mongodb+srv://20520646:20520646@cluster0.ukwx1ww.mongodb.net/')
 
@@ -211,7 +217,55 @@ def login_account():
         mimetype='application/json'
     )
     return jsonify({'success': False, 'message': 'Đăng nhập không thành công'})
+@app.route('/<MaLMH>/diemdanh',methods= ['GET','POST'])    
+def get_img_to_check_attendance(MaLMH):
+    url = 'data_embeddings.npz'
+    data = load(url)
+    print(">>>",data)
+    faces, labels = data['arr_0'], data['arr_1']
+    # print(f'>>> Dataset: train={faces.shape[0]}')
+    # model, out_encoder = train_model(faces, labels)
+    # in_encoder = Normalizer(norm ='l2')
+    # faces = in_encoder.transform(faces)
+    out_encoder = LabelEncoder()
+    out_encoder.fit(labels)
+
+    # print(labels, type(labels))
+
+    labels = out_encoder.transform(labels)
+    with open('./faces_classification.pkl',  'rb') as file:
+       model = pickle.load(file)
+    # with open('faces_classification.pkl',  'wb') as file:
+    #     pickle.dump(model,file)
+    print(labels)
+    img = get_firebase()
+    face, box = extract_face("",link = False, img = img)
+    embedding = get_embeddings([face])
+
+    yhat_class = model.predict(embedding)
+    yhat_prop = model.predict_proba(embedding)
+    class_index = yhat_class[0]
     
+    class_probability = yhat_prop[0,class_index] * 100
+    predict_name = out_encoder.inverse_transform(yhat_class)
+    print("probability: ", class_probability)
+    print("name:", predict_name[0])
+    if class_probability >= 60:
+        for sv in SinhVien_collection.find({"Lop":MaLMH}):
+            if sv["MaSV"] == predict_name[0].strip():
+                converted = json_util.dumps({"attendance":True}) 
+                return app.response_class(
+                    response=converted,
+                    status=200,
+                    mimetype='application/json')  
+    converted = json_util.dumps({"attendance":False}) 
+    return app.response_class(
+        response=converted,
+        status=200,
+        mimetype='application/json')
+@app.route('/diemdanh/<MaSV>/<MaLMH>/<day>',methods= ['GET','POST'])    
+def start_to_check_attendance(MaSV,MaLMH):
+    pass
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")
 

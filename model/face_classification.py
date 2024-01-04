@@ -35,20 +35,20 @@ if __name__ == '__main__':
     url = './data_embeddings.npz'
     data = load(url)
     faces, labels = data['arr_0'], data['arr_1']
-    print(f'>>> Dataset: train={faces.shape[0]}')
-    model, out_encoder = train_model(faces, labels)
-    in_encoder = Normalizer(norm ='l2')
-    faces = in_encoder.transform(faces)
-    # out_encoder = LabelEncoder()
-    # out_encoder.fit(labels)
+    # print(f'>>> Dataset: train={faces.shape[0]}')
+    # model, out_encoder = train_model(faces, labels)
+    # in_encoder = Normalizer(norm ='l2')
+    # faces = in_encoder.transform(faces)
+    out_encoder = LabelEncoder()
+    out_encoder.fit(labels)
 
     # print(labels, type(labels))
 
     labels = out_encoder.transform(labels)
-    # with open('faces_classification.pkl',  'rb') as file:
-    #    model = pickle.load(file)
-    with open('faces_classification.pkl',  'wb') as file:
-        pickle.dump(model,file)
+    with open('faces_classification.pkl',  'rb') as file:
+       model = pickle.load(file)
+    # with open('faces_classification.pkl',  'wb') as file:
+    #     pickle.dump(model,file)
     print(labels)
     img = get_firebase()
     face, box = extract_face("",link = False, img = img)

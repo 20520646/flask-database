@@ -5,7 +5,7 @@ import cv2
 
 
 def get_firebase(url="data/9.jpg" ):
-    cred = credentials.Certificate("./sever.json")
+    cred = credentials.Certificate("sever.json")
     app = firebase_admin.initialize_app(cred, {'storageBucket': 'esp-32-cam-demo.appspot.com'})
     bucket = storage.bucket()
     
