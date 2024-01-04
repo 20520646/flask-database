@@ -60,7 +60,14 @@ def get_student(MaSV):
 @app.route('/giangvien/<MaGV>',methods= ['GET','POST'])
 def get_giangvien(MaGV):
     giangvien_all = list(GiangVien_collection.find({"MaGv":MaGV}))
-    converted_students = json_util.dumps(giangvien_all)
+    if LopMonHoc_collection.find({"MaGV":MaGV}):
+        lophoc_all = LopMonHoc_collection.find({"MaGV":MaGV})
+        malmh = []
+        for lmh in lophoc_all:
+            mlmh = lmh["MaLMH"]
+            malmh.append({"MaLMH":mlmh})
+    converted_students = json_util.dumps({"Thong tin giang vien":giangvien_all,
+                                          "MaLMH":malmh})
     return app.response_class(
         response=converted_students,
         status=200,
