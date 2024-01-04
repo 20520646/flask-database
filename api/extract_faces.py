@@ -35,7 +35,6 @@ def load_faces(directory):
     # loop to extract face in image
     for file_name in listdir(directory):
         path = directory + file_name
-        print('>>> ',path)
         face, _ = extract_face(path)
         faces.append(face)
     return faces
@@ -47,12 +46,10 @@ def load_dataset(directory):
     for subdir in listdir(directory):
         path = directory + '/' + subdir + '/'
         if not isdir(path):
-            print('>>> ',path)
             continue
-        print('>>> ',path)
         faces = load_faces(path)
         labels = [subdir for _ in range(len(faces))]
-        print(f'>>> loaded {len(faces)} examples for class: {subdir}')
+       
         X.extend(faces)
         Y.extend(labels)
     return asarray(X), asarray(Y)
