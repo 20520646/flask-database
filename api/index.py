@@ -224,7 +224,7 @@ def get_img_to_check_attendance(MaLMH):
     global data
     global converted
     if times == 0:
-        url = 'data_embeddings.npz'
+        url = './api/data_embeddings.npz'
         data = load(url)
         print(">>>",data)
         faces, labels = data['arr_0'], data['arr_1']
@@ -238,7 +238,7 @@ def get_img_to_check_attendance(MaLMH):
         # print(labels, type(labels))
 
         labels = out_encoder.transform(labels)
-        with open('./faces_classification.pkl',  'rb') as file:
+        with open('./api/faces_classification.pkl',  'rb') as file:
             model = pickle.load(file)
         # with open('faces_classification.pkl',  'wb') as file:
         #     pickle.dump(model,file)

@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, storage
 import numpy as np
 import cv2
-cred = credentials.Certificate("sever.json")
+cred = credentials.Certificate("./api/sever.json")
 app_firebase = firebase_admin.initialize_app(cred, {'storageBucket': 'esp-32-cam-demo.appspot.com'})
 def get_firebase(url="data/9.jpg" ):
     bucket = storage.bucket()
