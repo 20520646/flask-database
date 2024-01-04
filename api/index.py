@@ -103,7 +103,7 @@ def get_phuhuynh(MaPH):
                 TenSV = sv["TenSV"]
                 GioiTinh = sv["GioiTinh"]
                 NoiSinh = sv["NoiSinh"]
-                DiaChi = sv["Dia Chi"]
+                DiaChi = sv["DiaChi"]
                 TenDN = sv["TenDN"]
                 mk = sv["MK"]
         converted_students = json_util.dumps({"PhuHuynh":all_Phuhuynh,
@@ -144,10 +144,26 @@ def get_date(date):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/register',methods= ['GET','POST'])    
-def register_account():
-    pass
-
+@app.route('/lopmonhoc/<MaLMH>',methods= ['GET','POST'])    
+def get_lmh(MaLMH):
+    if LopMonHoc_collection.find({"MaLMH":MaLMH}):
+        Lopmonhoc_all = list(LopMonHoc_collection.find({"MaLMH":MaLMH}))
+    if SinhVien_collection.find({"Lop":MaLMH}):
+        sinhvien_all= list(SinhVien_collection.find({"Lop":MaLMH}))
+        sinhvien1 = []
+        print(sinhvien_all)
+        for sv in sinhvien_all:
+            _id = sv["_id"]
+            MaSV = sv["MaSV"]
+            TenSV = sv["TenSV"]
+            sinhvien1.append({"_id":_id,"MaSV":MaSV,"TenSV": TenSV})
+    converted_courses = json_util.dumps({"Thong tin lop hoc":Lopmonhoc_all,
+                                         "Thong tin sinh vien":sinhvien1})
+    return app.response_class(
+        response=converted_courses,
+        status=200,
+        mimetype='application/json'
+    )
 @app.route('/login',methods= ['GET','POST'])    
 def login_account():
     data = request.get_json()
