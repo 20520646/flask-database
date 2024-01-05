@@ -24,6 +24,7 @@ GiangVien_collection = database["GiangVien"]
 PhuHuynh_collection = database["PhuHuynh"]
 
 
+isConfirm = False
 times = 0
 data = None
 app = Flask(__name__)
@@ -204,8 +205,7 @@ def login_account():
                 )
         for ph in PhuHuynh_collection.find():
             if ph["TenDN"] == username and ph["MK"] == password:
-                converted = json_util.dumps({"isCorrect":True,
-                                             "typeAccount":"ph"})
+                converted = json_util.dumps({"isCorrect":True, "typeAccount":"ph"})
                 return app.response_class(
                     response=converted,
                     status=200,
@@ -217,13 +217,14 @@ def login_account():
         status=200,
         mimetype='application/json'
     )
-    return jsonify({'success': False, 'message': 'Đăng nhập không thành công'})
-@app.route('/<MaLMH>/diemdanh',methods= ['GET','POST'])    
-def get_img_to_check_attendance(MaLMH):
+    # return jsonify({'success': False, 'message': 'Đăng nhập không thành công'})
+@app.route('/<MaLMH>/<MaSV>/diemdanh',methods= ['GET','POST'])    
+def get_img_to_check_attendance(MaLMH,MaSV):
     global times
     global data
     global converted
-    if times == 0:
+    global img 
+    try:
         url = './api/data_embeddings.npz'
         data = load(url)
         print(">>>",data)
@@ -243,8 +244,14 @@ def get_img_to_check_attendance(MaLMH):
         # with open('faces_classification.pkl',  'wb') as file:
         #     pickle.dump(model,file)
         print(labels)
-        img = get_firebase()
+        img = get_firebase(url = f"data/{MaSV}_{MaLMH}.jpg")
         face, box = extract_face("",link = False, img = img)
+        if face.shape == (0,0,0):
+            converted = json_util.dumps({"attendance":False}) 
+            return app.response_class(
+                response=converted,
+                status=200,
+                mimetype='application/json')
         embedding = get_embeddings([face])
 
         yhat_class = model.predict(embedding)
@@ -257,30 +264,75 @@ def get_img_to_check_attendance(MaLMH):
         print("name:", predict_name[0])
         if class_probability >= 60:
             for sv in SinhVien_collection.find({"Lop":MaLMH}):
-                if sv["MaSV"] == predict_name[0].strip():
+                if sv["MaSV"] == predict_name[0].strip() and predict_name[0].strip()==mssv:
+                    
                     converted = json_util.dumps({"attendance":True})
                     data = converted
                     times += 1 
                     return app.response_class(
                         response=converted,
                         status=200,
-                        mimetype='application/json')  
+                        mimetype='application/json')
         converted = json_util.dumps({"attendance":False}) 
+        print("fgfdgfdgdfgfd")
         data = converted 
-        times += 1 
         return app.response_class(
             response=converted,
             status=200,
             mimetype='application/json')
-    else:
+    except:
+        return "e"
+@app.route('/diemdanh',methods= ['GET','POST'])    
+def start_to_check_attendance():
+    global mssv
+    global lop
+    data = request.get_json()
+    mssv = data.get('mssv')
+    lop = data.get('class')
+    if mssv and lop :
+        converted = json_util.dumps({"mssv":mssv,
+                                    "lop":lop}) 
         return app.response_class(
             response=converted,
             status=200,
             mimetype='application/json')
-@app.route('/diemdanh/<MaSV>/<MaLMH>/<day>',methods= ['GET','POST'])    
-def start_to_check_attendance(MaSV,MaLMH):
-    pass
-
+    return "No ok"
+@app.route('/xuly',methods= ['GET','POST'])    
+def start_to_check_attendance1():
+    try:
+        if mssv and lop:
+            converted = json_util.dumps({"mssv":mssv,
+                                        "lop":lop}) 
+            return app.response_class(
+                response=converted,
+                status=200,
+                mimetype='application/json')
+        return "None"
+    except:
+        return "None"
+@app.route('/confirm',methods= ['GET','POST'])    
+def confirm():
+    global isConfirm
+    confirm = request.get_json()
+    lenh = confirm.get("result")
+    if lenh:
+        isConfirm = True
+        return f"{isConfirm}"       
+    return f"{isConfirm}"
+@app.route('/confirm1',methods= ['GET','POST'])    
+def confirm1():
+    global isConfirm
+    if isConfirm == True:
+        converted = json_util.dumps({"attendance":True}) 
+        return app.response_class(
+            response=converted,
+            status=200,
+            mimetype='application/json')
+    converted = json_util.dumps({"attendance":False}) 
+    return app.response_class(
+        response=converted,
+        status=200,
+        mimetype='application/json')
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")
 
