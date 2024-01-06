@@ -1,0 +1,17 @@
+../model/dataset/val/Dat/10.jpg ['20520438'] 75.059894611723
+../model/dataset/val/Dat/11.jpg ['20520438'] 80.54524030614486
+../model/dataset/val/Dat/12.jpg ['20520438'] 64.43588526045039
+../model/dataset/val/Dat/9.jpg ['20520438'] 80.16040355885671
+../model/dataset/val/Duy/10.jpg ['20520467'] 82.82774010621272
+../model/dataset/val/Duy/8.jpg ['20520467'] 72.9786594561602
+../model/dataset/val/Duy/9.jpg ['20520467'] 71.63429901506872
+../model/dataset/val/La/11.jpg ['20521727'] 73.81779701812711
+../model/dataset/val/La/12.jpg ['20521727'] 49.285342607355226
+../model/dataset/val/La/13.jpg ['20521727'] 60.58609030218831
+../model/dataset/val/Nam/10.jpg ['20520646'] 71.20381964828599
+../model/dataset/val/Nam/11.jpg ['20520646'] 60.85950761481102
+../model/dataset/val/Nam/9.jpg ['20520646'] 67.93856991148124
+../model/dataset/val/Phat/10.jpg ['20521737'] 75.60738469780955
+../model/dataset/val/Phat/9.jpg ['20521737'] 78.47195564352731
+../model/dataset/val/Thao/7.jpg ['19520965'] 81.83303937933431
+../model/dataset/val/Thao/9.jpg ['19520965'] 84.95118255651596
