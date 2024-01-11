@@ -319,7 +319,35 @@ def confirm():
         isConfirm = True
         return f"{isConfirm}"       
     return f"{isConfirm}"
+@app.route('/dsdiemdanh',methods= ['GET','POST'])
+def get_ds_diem_danh():
+    now = datetime.now()
+    df = now.strftime("%H:%M:%S")
+    if df == "00:00:00":
+        ds_diem_danh = []
+    else:
+        if isConfirm == True:
+            ds_diem_danh.append({"Thong tin diem danh":{"Mssv":mssv}})  
+        ds = json_util.dumps(ds_diem_danh) 
+        return app.response_class(
+            response=ds,
+            status=200,
+            mimetype='application/json')
 @app.route('/confirm1',methods= ['GET','POST'])    
+def confirm1():
+    global isConfirm
+    if isConfirm == True:
+        converted = json_util.dumps({"attendance":True}) 
+        return app.response_class(
+            response=converted,
+            status=200,
+            mimetype='application/json')
+    converted = json_util.dumps({"attendance":False}) 
+    return app.response_class(
+        response=converted,
+        status=200,
+        mimetype='application/json')
+@app.route('/dsdiemdanh',methods= ['GET','POST'])    
 def confirm1():
     global isConfirm
     if isConfirm == True:
