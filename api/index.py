@@ -23,7 +23,7 @@ LopMonHoc_collection = database["LopMonHoc"]
 GiangVien_collection = database["GiangVien"]
 PhuHuynh_collection = database["PhuHuynh"]
 
-
+ds_diem_danh = []
 isConfirm = False
 times = 0
 data = None
@@ -321,13 +321,17 @@ def confirm():
     return f"{isConfirm}"
 @app.route('/dsdiemdanh',methods= ['GET','POST'])
 def get_ds_diem_danh():
+    global ds_diem_danh
     now = datetime.now()
     df = now.strftime("%H:%M:%S")
     if df == "00:00:00":
         ds_diem_danh = []
     else:
         if isConfirm == True:
-            ds_diem_danh.append({"Thong tin diem danh":{"Mssv":mssv}})  
+            for sv in SinhVien_collection.find():
+                if sv["MaSV"] == mssv:
+                    ds_diem_danh.append({"Thong tin diem danh":{"Mssv":mssv,
+                                                                "Ten sinh vien":sv["TenSV"]}})  
         ds = json_util.dumps(ds_diem_danh) 
         return app.response_class(
             response=ds,
@@ -347,20 +351,7 @@ def confirm1():
         response=converted,
         status=200,
         mimetype='application/json')
-@app.route('/dsdiemdanh',methods= ['GET','POST'])    
-def confirm1():
-    global isConfirm
-    if isConfirm == True:
-        converted = json_util.dumps({"attendance":True}) 
-        return app.response_class(
-            response=converted,
-            status=200,
-            mimetype='application/json')
-    converted = json_util.dumps({"attendance":False}) 
-    return app.response_class(
-        response=converted,
-        status=200,
-        mimetype='application/json')
+
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")
 
