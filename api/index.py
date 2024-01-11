@@ -23,6 +23,7 @@ LopMonHoc_collection = database["LopMonHoc"]
 GiangVien_collection = database["GiangVien"]
 PhuHuynh_collection = database["PhuHuynh"]
 
+
 ds_diem_danh = []
 isConfirm = False
 times = 0
@@ -184,6 +185,7 @@ def login_account():
     data = request.get_json()
     username = data.get('id')
     password = data.get('password')
+    
     if username and password :
         for sv in SinhVien_collection.find():
             if sv["TenDN"] == username and sv["MK"] == password:
@@ -220,6 +222,7 @@ def login_account():
     # return jsonify({'success': False, 'message': 'Đăng nhập không thành công'})
 @app.route('/<MaLMH>/<MaSV>/diemdanh',methods= ['GET','POST'])    
 def get_img_to_check_attendance(MaLMH,MaSV):
+    
     global times
     global data
     global converted
@@ -317,8 +320,10 @@ def confirm():
     lenh = confirm.get("result")
     if lenh:
         isConfirm = True
-        return f"{isConfirm}"       
+        return f"{isConfirm}" 
+          
     return f"{isConfirm}"
+
 @app.route('/dsdiemdanh',methods= ['GET','POST'])
 def get_ds_diem_danh():
     global ds_diem_danh
@@ -330,13 +335,18 @@ def get_ds_diem_danh():
         if isConfirm == True:
             for sv in SinhVien_collection.find():
                 if sv["MaSV"] == mssv:
+                    for sv1 in ds_diem_danh:
+                        if mssv == sv1["Mssv"]:
+                            return ds_diem_danh
+                        
                     ds_diem_danh.append({"Thong tin diem danh":{"Mssv":mssv,
-                                                                "Ten sinh vien":sv["TenSV"]}})  
+                                                                        "Ten sinh vien":sv["TenSV"]}})  
         ds = json_util.dumps(ds_diem_danh) 
         return app.response_class(
             response=ds,
             status=200,
             mimetype='application/json')
+        
 @app.route('/confirm1',methods= ['GET','POST'])    
 def confirm1():
     global isConfirm
