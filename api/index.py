@@ -16,7 +16,7 @@ from monhoc import monhoc
 from giangvien import giangvien
 from lopmonhoc import lopmonhoc
 from login import login
-
+import time;
 
 
 client = MongoClient('mongodb+srv://20520646:20520646@cluster0.ukwx1ww.mongodb.net/')
@@ -34,6 +34,7 @@ ds_diem_danh = []
 isConfirm = False
 times = 0
 data = None
+abc = False
 app = Flask(__name__)
 app.config["MONGO_URI"] = "mongodb+srv://20520646:20520646@cluster0.ukwx1ww.mongodb.net/"
 mongo = PyMongo(app)
@@ -42,9 +43,6 @@ app.register_blueprint(monhoc)
 app.register_blueprint(lopmonhoc)
 app.register_blueprint(giangvien)
 app.register_blueprint(login)
-
-
-
 
 
 
@@ -112,9 +110,10 @@ def get_phuhuynh(MaPH):
 def confirm():
     global MaLMH
     global id_device
-    # Mathietbi = request.get_json()
-    # id_device = Mathietbi.get("id_device")
-    id_device = "15"
+    Mathietbi = request.get_json()
+    id_device = Mathietbi.get("id_device")
+    print(">>>id_device",id_device)
+    # id_device = 15
     sinhvien_all= list(ThietBi_colleciton.find({"MaTB":id_device}))
     for i in sinhvien_all:
         MaLMH = i["MaLMH"]
@@ -128,16 +127,27 @@ def confirm1():
     return "Phat"
 @app.route('/confirm3',methods= ['GET','POST'])    
 def confirm3():
-    if MaLMH:
-        converted = json_util.dumps({"MaLMH":MaLMH})
-        return converted, 200, {'Content-Type': 'application/json'}
-    return "Phat"
-@app.route('/diemdanh',methods= ['GET','POST'])    
+    if abc == True:
+        a = json_util.dumps({"flag":True})
+        return a, 200, {'Content-Type': 'application/json'}
+    else:
+        a = json_util.dumps({"flag":False})
+        return a, 200, {'Content-Type': 'application/json'}
+@app.route('/confirm4',methods= ['GET','POST'])    
+def confirm4():
+    return convertedd, 200, {'Content-Type': 'application/json'}
+
+@app.route('/confirm2',methods= ['GET','POST'])    
 def get_img_to_check_attendance():
-    
+    global abc
+    global convertedd
+    abc = False
     global times
     global data
     global img 
+    tenanh = request.get_json()
+    photo_name = tenanh.get("photo_name")
+    print(">>>photo_name",photo_name)
     try:
         url = './api/data_embeddings.npz'
         data = load(url)
@@ -158,8 +168,9 @@ def get_img_to_check_attendance():
         # with open('faces_classification.pkl',  'wb') as file:
         #     pickle.dump(model,file)
         print(labels)
-        # img = get_firebase(url = f"data/5.jpg")
-        img = get_firebase(url = f"data/{MaLMH}_{id_device}.jpg")
+        img = get_firebase(url = f"data/CE410.O11_15.jpg")
+        # img = get_firebase(url = f"data/{photo_name}.jpg")
+        
         face, box = extract_face("",link = False, img = img)
         if face.shape == (0,0,0):
             converted = json_util.dumps({"attendance":False}) 
@@ -177,27 +188,35 @@ def get_img_to_check_attendance():
         predict_name = out_encoder.inverse_transform(yhat_class)
         print("probability: ", class_probability)
         print("name:", predict_name[0])
+        abc = True
+        thoi_gian_hien_tai = datetime.now()
+        thoi_gian_can_so_sanh = datetime(thoi_gian_hien_tai.year, thoi_gian_hien_tai.month, thoi_gian_hien_tai.day, 16, 30, 0)
+        khoang_cach_thoi_gian = thoi_gian_can_so_sanh - thoi_gian_hien_tai
+        so_giay = int(khoang_cach_thoi_gian.total_seconds())
+        print("Thời gian (số giây):", so_giay)
         if class_probability >= 60:
             for a in list(Diemdanh_colection.find({"MaSV":predict_name[0]})):
                 convertedd = json_util.dumps({"attendance":True,
-                                            "mssv":predict_name[0]})
+                                            "mssv":predict_name[0],
+                                            "delay":so_giay})
                 return convertedd, 200, {'Content-Type': 'application/json'}
                     
             sinhvien_all= list(SinhVien_collection.find({"MaSV":predict_name[0]}))
             for i in sinhvien_all:
                 TenSV = i["TenSV"]
                 print(">>>",TenSV)
-            Diemdanh_colection.insert_one({"MaSV":predict_name[0],"TenSV":TenSV})
+            Diemdanh_colection.insert_one({"MaSV":predict_name[0],"TenSV":TenSV,"Thoi gian diem danh":thoi_gian_hien_tai})
                 
             convertedd = json_util.dumps({"attendance":True,
-                                        "mssv":predict_name[0]})
+                                        "mssv":predict_name[0],
+                                        "delay":so_giay})
             return convertedd, 200, {'Content-Type': 'application/json'}     
-        converted = json_util.dumps({"attendance":False}) 
-        return converted, 200, {'Content-Type': 'application/json'} 
+        convertedd = json_util.dumps({"attendance":False}) 
+        return convertedd, 200, {'Content-Type': 'application/json'} 
         print("fgfdgfdgdfgfd")
     except:
-        converted = json_util.dumps({"attendance":False}) 
-        return converted, 200, {'Content-Type': 'application/json'} 
+        convertedd = json_util.dumps({"attendance":False}) 
+        return convertedd, 200, {'Content-Type': 'application/json'} 
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")
     
