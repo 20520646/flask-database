@@ -8,9 +8,9 @@ import json
 from numpy import load
 from sklearn.preprocessing import LabelEncoder, Normalizer
 import pickle
-# from make_embeddings import get_embeddings
-# from extract_faces import extract_face
-# from firebase1 import get_firebase
+from make_embeddings import get_embeddings
+from extract_faces import extract_face
+from firebase1 import get_firebase
 from student import user
 from monhoc import monhoc
 from giangvien import giangvien
@@ -29,6 +29,7 @@ GiangVien_collection = database["GiangVien"]
 PhuHuynh_collection = database["PhuHuynh"]
 Diemdanh_colection = database["DiemDanh"]
 ThietBi_colleciton = database["ThietBi"]
+
 ds_diem_danh = []
 isConfirm = False
 times = 0
@@ -110,6 +111,7 @@ def get_phuhuynh(MaPH):
 @app.route('/confirm',methods= ['GET','POST'])    
 def confirm():
     global MaLMH
+    global id_device
     # Mathietbi = request.get_json()
     # id_device = Mathietbi.get("id_device")
     id_device = "15"
@@ -130,71 +132,72 @@ def confirm3():
         converted = json_util.dumps({"MaLMH":MaLMH})
         return converted, 200, {'Content-Type': 'application/json'}
     return "Phat"
-# @app.route('/<MaLMH>/<MaSV>/diemdanh',methods= ['GET','POST'])    
-# def get_img_to_check_attendance(MaLMH,MaSV):
+@app.route('/diemdanh',methods= ['GET','POST'])    
+def get_img_to_check_attendance():
     
-#     global times
-#     global data
-#     global converted
-#     global img 
-#     try:
-#         url = './api/data_embeddings.npz'
-#         data = load(url)
-#         print(">>>",data)
-#         faces, labels = data['arr_0'], data['arr_1']
-#         # print(f'>>> Dataset: train={faces.shape[0]}')
-#         # model, out_encoder = train_model(faces, labels)
-#         # in_encoder = Normalizer(norm ='l2')
-#         # faces = in_encoder.transform(faces)
-#         out_encoder = LabelEncoder()
-#         out_encoder.fit(labels)
+    global times
+    global data
+    global img 
+    try:
+        url = './api/data_embeddings.npz'
+        data = load(url)
+        print(">>>",data)
+        faces, labels = data['arr_0'], data['arr_1']
+        # print(f'>>> Dataset: train={faces.shape[0]}')
+        # model, out_encoder = train_model(faces, labels)
+        # in_encoder = Normalizer(norm ='l2')
+        # faces = in_encoder.transform(faces)
+        out_encoder = LabelEncoder()
+        out_encoder.fit(labels)
 
-#         # print(labels, type(labels))
+        # print(labels, type(labels))
 
-#         labels = out_encoder.transform(labels)
-#         with open('./api/faces_classification.pkl',  'rb') as file:
-#             model = pickle.load(file)
-#         # with open('faces_classification.pkl',  'wb') as file:
-#         #     pickle.dump(model,file)
-#         print(labels)
-#         img = get_firebase(url = f"data/{MaSV}_{MaLMH}.jpg")
-#         face, box = extract_face("",link = False, img = img)
-#         if face.shape == (0,0,0):
-#             converted = json_util.dumps({"attendance":False}) 
-#             return app.response_class(
-#                 response=converted,
-#                 status=200,
-#                 mimetype='application/json')
-#         embedding = get_embeddings([face])
+        labels = out_encoder.transform(labels)
+        with open('./api/faces_classification.pkl',  'rb') as file:
+            model = pickle.load(file)
+        # with open('faces_classification.pkl',  'wb') as file:
+        #     pickle.dump(model,file)
+        print(labels)
+        # img = get_firebase(url = f"data/5.jpg")
+        img = get_firebase(url = f"data/{MaLMH}_{id_device}.jpg")
+        face, box = extract_face("",link = False, img = img)
+        if face.shape == (0,0,0):
+            converted = json_util.dumps({"attendance":False}) 
+            return app.response_class(
+                response=converted,
+                status=200,
+                mimetype='application/json')
+        embedding = get_embeddings([face])
 
-#         yhat_class = model.predict(embedding)
-#         yhat_prop = model.predict_proba(embedding)
-#         class_index = yhat_class[0]
+        yhat_class = model.predict(embedding)
+        yhat_prop = model.predict_proba(embedding)
+        class_index = yhat_class[0]
         
-#         class_probability = yhat_prop[0,class_index] * 100
-#         predict_name = out_encoder.inverse_transform(yhat_class)
-#         print("probability: ", class_probability)
-#         print("name:", predict_name[0])
-#         if class_probability >= 60:
-#             for sv in SinhVien_collection.find({"Lop":MaLMH}):
-#                 if sv["MaSV"] == predict_name[0].strip() and predict_name[0].strip()==mssv:
+        class_probability = yhat_prop[0,class_index] * 100
+        predict_name = out_encoder.inverse_transform(yhat_class)
+        print("probability: ", class_probability)
+        print("name:", predict_name[0])
+        if class_probability >= 60:
+            for a in list(Diemdanh_colection.find({"MaSV":predict_name[0]})):
+                convertedd = json_util.dumps({"attendance":True,
+                                            "mssv":predict_name[0]})
+                return convertedd, 200, {'Content-Type': 'application/json'}
                     
-#                     converted = json_util.dumps({"attendance":True})
-#                     data = converted
-#                     times += 1 
-#                     return app.response_class(
-#                         response=converted,
-#                         status=200,
-#                         mimetype='application/json')
-#         converted = json_util.dumps({"attendance":False}) 
-#         print("fgfdgfdgdfgfd")
-#         data = converted 
-#         return app.response_class(
-#             response=converted,
-#             status=200,
-#             mimetype='application/json')
-#     except:
-#         return "e"
+            sinhvien_all= list(SinhVien_collection.find({"MaSV":predict_name[0]}))
+            for i in sinhvien_all:
+                TenSV = i["TenSV"]
+                print(">>>",TenSV)
+            Diemdanh_colection.insert_one({"MaSV":predict_name[0],"TenSV":TenSV})
+                
+            convertedd = json_util.dumps({"attendance":True,
+                                        "mssv":predict_name[0]})
+            return convertedd, 200, {'Content-Type': 'application/json'}     
+        converted = json_util.dumps({"attendance":False}) 
+        return converted, 200, {'Content-Type': 'application/json'} 
+        print("fgfdgfdgdfgfd")
+    except:
+        converted = json_util.dumps({"attendance":False}) 
+        return converted, 200, {'Content-Type': 'application/json'} 
 if __name__ == "__main__":
     app.run(debug=True, host = "0.0.0.0")
     

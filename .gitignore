@@ -14,3 +14,4 @@ venv.bak/
 node_modules/
 model/
 train/
+test/
