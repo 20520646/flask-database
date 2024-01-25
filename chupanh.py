@@ -14,7 +14,7 @@ while  count <= 100:
     # print("1")
     if not ret or key == ord('q'):
         break
-    cv2.imwrite(f'train/Nam/{count}.jpg', frame)
+    cv2.imwrite(f'train/20520438/{count}.jpg', frame)
     sleep(1)
     cv2.imshow(f'{count}',frame)
     print(count)

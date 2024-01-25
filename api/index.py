@@ -46,7 +46,7 @@ app.register_blueprint(login)
 
 
 
-
+CORS(app, origins=["http://localhost:5173"])
 
 @app.route('/')
 def welcome():
@@ -63,7 +63,32 @@ def get_phuhuynh(MaPH):
         response=converted_students,
         status=200,
         mimetype='application/json'
-    )   
+    )
+@app.route('/kiemtra/<MaSV>/',methods= ['GET'])
+def kiemtra1(MaSV):
+    pass
+@app.route('/dsdiemdanh/<MaLMH>/',methods= ['GET','POST'])
+def dssinhviendiemdanh(MaLMH):
+    dsdiemdanh = []
+    thoi_gian_hien_tai = datetime.now()
+    for a in list(Diemdanh_colection.find({"LopMH":MaLMH})):
+        if thoi_gian_hien_tai.date() == a["Thoi gian diem danh"].date():
+            dsdiemdanh.append(a)
+    converted_students = json_util.dumps({"Thong tin sinh vien":dsdiemdanh})
+    return app.response_class(
+        response=converted_students,
+        status=200,
+        mimetype='application/json'    
+    )
+@app.route('/thongtindiemdanh/<MaSV>/',methods= ['GET','POST'])
+def dssinhviendiemdanh1(MaSV):
+    dssv = Diemdanh_colection.find({"MaSV":MaSV})
+    converted_students = json_util.dumps({"Thong tin sinh vien":dssv})
+    return app.response_class(
+        response=converted_students,
+        status=200,
+        mimetype='application/json'    
+    )
 # @app.route('/date/<date>',methods= ['GET','POST'])
 # def get_date(date):
 #     try:
@@ -135,6 +160,7 @@ def confirm3():
         return a, 200, {'Content-Type': 'application/json'}
 @app.route('/confirm4',methods= ['GET','POST'])    
 def confirm4():
+    
     return convertedd, 200, {'Content-Type': 'application/json'}
 
 @app.route('/confirm2',methods= ['GET','POST'])    
@@ -168,11 +194,12 @@ def get_img_to_check_attendance():
         # with open('faces_classification.pkl',  'wb') as file:
         #     pickle.dump(model,file)
         print(labels)
-        img = get_firebase(url = f"data/CE410.O11_15.jpg")
-        # img = get_firebase(url = f"data/{photo_name}.jpg")
-        
+        # img = get_firebase(url = f"data/CE410.O11_15.jpg")
+        img = get_firebase(url = f"data/{photo_name}.jpg")
+        abc = True
         face, box = extract_face("",link = False, img = img)
-        if face.shape == (0,0,0):
+        
+        if box == []:
             converted = json_util.dumps({"attendance":False}) 
             return app.response_class(
                 response=converted,
@@ -188,24 +215,28 @@ def get_img_to_check_attendance():
         predict_name = out_encoder.inverse_transform(yhat_class)
         print("probability: ", class_probability)
         print("name:", predict_name[0])
-        abc = True
+        
         thoi_gian_hien_tai = datetime.now()
-        thoi_gian_can_so_sanh = datetime(thoi_gian_hien_tai.year, thoi_gian_hien_tai.month, thoi_gian_hien_tai.day, 16, 30, 0)
+        thoi_gian_can_so_sanh = datetime(thoi_gian_hien_tai.year, thoi_gian_hien_tai.month, thoi_gian_hien_tai.day, 11, 30, 0)
         khoang_cach_thoi_gian = thoi_gian_can_so_sanh - thoi_gian_hien_tai
         so_giay = int(khoang_cach_thoi_gian.total_seconds())
+        if so_giay < 0:
+            thoi_gian_can_so_sanh = datetime(thoi_gian_hien_tai.year, thoi_gian_hien_tai.month, thoi_gian_hien_tai.day, 16, 30, 0)
+            khoang_cach_thoi_gian = thoi_gian_can_so_sanh - thoi_gian_hien_tai
+            so_giay = int(khoang_cach_thoi_gian.total_seconds())
         print("Thời gian (số giây):", so_giay)
         if class_probability >= 60:
             for a in list(Diemdanh_colection.find({"MaSV":predict_name[0]})):
-                convertedd = json_util.dumps({"attendance":True,
-                                            "mssv":predict_name[0],
-                                            "delay":so_giay})
-                return convertedd, 200, {'Content-Type': 'application/json'}
-                    
+                if thoi_gian_hien_tai.date() == a["Thoi gian diem danh"].date():
+                    convertedd = json_util.dumps({"attendance":True,
+                                                "mssv":predict_name[0],
+                                                "delay":so_giay})
+                    return convertedd, 200, {'Content-Type': 'application/json'}        
             sinhvien_all= list(SinhVien_collection.find({"MaSV":predict_name[0]}))
             for i in sinhvien_all:
                 TenSV = i["TenSV"]
                 print(">>>",TenSV)
-            Diemdanh_colection.insert_one({"MaSV":predict_name[0],"TenSV":TenSV,"Thoi gian diem danh":thoi_gian_hien_tai})
+            Diemdanh_colection.insert_one({"LopMH":MaLMH,"MaSV":predict_name[0],"TenSV":TenSV,"Thoi gian diem danh":thoi_gian_hien_tai})
                 
             convertedd = json_util.dumps({"attendance":True,
                                         "mssv":predict_name[0],
