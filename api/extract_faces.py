@@ -43,8 +43,10 @@ def load_dataset(directory):
     #init list X contain list face of user and Y have labels of faces
     X, Y = [], []
     #loop to extract faces of user and append it to X, its label to Y
+    print(directory)
     for subdir in listdir(directory):
         path = directory + '/' + subdir + '/'
+        print(path)
         if not isdir(path):
             continue
         faces = load_faces(path)
@@ -55,9 +57,13 @@ def load_dataset(directory):
     return asarray(X), asarray(Y)
 
 if __name__ == '__main__':
-    directory = './dataset/train'
-    file_name = './data_faces.npz'
+    directory = './datasets/train/'
+    train_data, train_labels = load_dataset(directory)
+    print("Train: ",train_data.shape, train_labels.shape)
 
-    train_data, labels = load_dataset(directory)
-    print(train_data.shape, labels.shape)
-    savez_compressed(file_name, train_data, labels)
+    directory = './datasets/test/'
+    test_data, test_labels = load_dataset(directory)
+    print("Test: ",test_data.shape, test_labels.shape)
+    file_name = 'data_faces.npz'
+
+    savez_compressed(file_name, train_data, train_labels)
