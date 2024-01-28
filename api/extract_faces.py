@@ -21,7 +21,7 @@ def extract_face(file_name, required_size = (160,160), link = True, img = None):
     faces = detector.detect_faces(img)
     #check if image has not any face, function will return empty list
     if faces == []:
-        return faces
+        return faces, []
     #extract face region
     arr = [x,y,w,h] = faces[0]['box']
     face = img[y:y+h, x:x+w]
@@ -35,7 +35,10 @@ def load_faces(directory):
     # loop to extract face in image
     for file_name in listdir(directory):
         path = directory + file_name
-        face, _ = extract_face(path)
+        print('>>> ',path)
+        face, arr = extract_face(path)
+        if arr == []:
+            continue
         faces.append(face)
     return faces
 
@@ -43,27 +46,29 @@ def load_dataset(directory):
     #init list X contain list face of user and Y have labels of faces
     X, Y = [], []
     #loop to extract faces of user and append it to X, its label to Y
-    print(directory)
     for subdir in listdir(directory):
         path = directory + '/' + subdir + '/'
-        print(path)
         if not isdir(path):
+            print('>>> ',path)
             continue
+        print('>>> ',path)
         faces = load_faces(path)
         labels = [subdir for _ in range(len(faces))]
-       
+        print(f'>>> loaded {len(faces)} examples for class: {subdir}')
         X.extend(faces)
         Y.extend(labels)
     return asarray(X), asarray(Y)
 
 if __name__ == '__main__':
-    directory = './datasets/train/'
+
+    directory = './dataset/train'
     train_data, train_labels = load_dataset(directory)
-    print("Train: ",train_data.shape, train_labels.shape)
+    print(train_data.shape, train_labels.shape)
 
-    directory = './datasets/test/'
+    directory = './dataset/test'
     test_data, test_labels = load_dataset(directory)
-    print("Test: ",test_data.shape, test_labels.shape)
-    file_name = 'data_faces.npz'
+    print(test_data.shape, test_labels.shape)
 
-    savez_compressed(file_name, train_data, train_labels)
+    file_name = './data_faces.npz'
+
+    savez_compressed(file_name, train_data, train_labels,  test_data, test_labels)
