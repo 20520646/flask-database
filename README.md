@@ -4,7 +4,7 @@
 #### **Step 2:** 
 - Tạo thư mục venv bằng cách chạy lệnh: `python -m venv .venv`
 #### **Step 3:** 
--Tải các thư viện cần thiết bằng lệnh `pip install -r requirements.txt`
+- Tải các thư viện cần thiết bằng lệnh `pip install -r requirements.txt`
 #### **Step 4:** 
 - Chạy file `index.py` trong thư mục `api` để trải nghiệm code
 ## Các kiến thức cần tìm hiểu liên quan đến code: API, PyMogoDB
