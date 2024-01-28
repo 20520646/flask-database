@@ -16,7 +16,7 @@ LopMonHoc_collection = database["LopMonHoc"]
 GiangVien_collection = database["GiangVien"]
 PhuHuynh_collection = database["PhuHuynh"]
 Diemdanh_colection = database["DiemDanh"]
-
+DiemSo_colection = database["DiemSo"]
 CORS(monhoc)
 @monhoc.route('/monhoc/<MaSV>',methods= ['GET','POST'])
 def get_monhoc(MaSV):
@@ -37,10 +37,14 @@ def get_lopmonhoc(MaSV,MaLMH):
             all_giangvien = GiangVien_collection.find({"MaGv":Magv})
             for ten in all_giangvien:
                 tend = ten["TenGV"]
+            all_buoihoc = BuoiHoc_collection.find({"MaLMH":MaLMH})
+            all_diem = DiemSo_colection.find({"MaLMH":MaLMH,"MaSV":MaSV})
+            for diem in all_diem:
+                diemm = diem["Diem"]
         for a in list(Diemdanh_colection.find({"MaSV":MaSV})):
             if thoi_gian_hien_tai.date() == a["Thoi gian diem danh"].date():
                 kiemtra = True
             else:
                 kiemtra = False
-        converted_students = json_util.dumps({"Lop mon hoc":all_Lopmonhocc,"Giang vien":tend,"Kiemtra":kiemtra})
+        converted_students = json_util.dumps({"Lop mon hoc":all_Lopmonhocc,"Giang vien":tend,"Buoi hoc":all_buoihoc,"Diem":diemm,"Kiemtra":kiemtra})
         return converted_students, 200, {'Content-Type': 'application/json'}

@@ -51,22 +51,21 @@ CORS(app, origins=["http://localhost:5173"])
 @app.route('/')
 def welcome():
     return "Kinh Khung's database"
-@app.route('/phuhuynh/<MaPH>/',methods= ['GET','POST'])
-def get_phuhuynh(MaPH):
-    all_phuhuynh = PhuHuynh_collection.find({"MaPH": MaPH})
-    all_phuhuynhs = PhuHuynh_collection.find({"MaPH": MaPH})
-    for ph in all_phuhuynhs:
-        all_sinhvien = SinhVien_collection.find({"MaSV":ph["MaSV"]})
-    converted_students = json_util.dumps({"Thong tin sinh vien":all_sinhvien,
-                                         "Thong tin phu huynh":all_phuhuynh})
-    return app.response_class(
-        response=converted_students,
-        status=200,
-        mimetype='application/json'
-    )
-@app.route('/kiemtra/<MaSV>/',methods= ['GET'])
-def kiemtra1(MaSV):
-    pass
+# @app.route('/phuhuynh1/<MaPH>/',methods= ['GET','POST'])
+# def get_phuhuynh(MaPH):
+    
+#     all_phuhuynh = PhuHuynh_collection.find({"MaPH": MaPH})
+#     all_phuhuynhs = PhuHuynh_collection.find({"MaPH": MaPH})
+#     for ph in all_phuhuynhs:
+#         all_sinhvien = SinhVien_collection.find({"MaSV":ph["MaSV"]})
+#     converted_students = json_util.dumps({"Thong tin sinh vien":all_sinhvien,
+#                                          "Thong tin phu huynh":all_phuhuynh})
+#     return app.response_class(
+#         response=converted_students,
+#         status=200,
+#         mimetype='application/json'
+#     )
+
 @app.route('/dsdiemdanh/<MaLMH>/',methods= ['GET','POST'])
 def dssinhviendiemdanh(MaLMH):
     dsdiemdanh = []
@@ -80,15 +79,40 @@ def dssinhviendiemdanh(MaLMH):
         status=200,
         mimetype='application/json'    
     )
-@app.route('/thongtindiemdanh/<MaSV>/',methods= ['GET','POST'])
-def dssinhviendiemdanh1(MaSV):
-    dssv = Diemdanh_colection.find({"MaSV":MaSV})
-    converted_students = json_util.dumps({"Thong tin sinh vien":dssv})
+@app.route('/phuhuynh/<MaPH>/',methods= ['GET','POST'])
+def phuhuynh11(MaPH):
+    all_phuhuynh = PhuHuynh_collection.find({"MaPH":MaPH})
+    for ph in all_phuhuynh:
+        phuhuynh = ph["TenPH"]
+        all_sinhvien = SinhVien_collection.find({"MaSV":ph["MaSV"]})
+        sinhvien = []
+        for sv in all_sinhvien:
+            TenSV = sv["TenSV"]
+            MaSV = sv["MaSV"]
+            sinhvien.append({"TenSV":TenSV,"MaSV":MaSV})
+        if SinhVien_collection.find({"MaSV":ph["MaSV"]}):
+            lopmonhocc = []
+            all_lopmonhoc = list(LopMonHoc_collection.find())
+            for lmh in all_lopmonhoc:
+                MaLMH = lmh["MaLMH"]
+                TenLMH = lmh["TenLMH"]
+                lopmonhocc.append({"MaLMH":MaLMH,"TenLMH":TenLMH})
+    converted_students = json_util.dumps({"Ten phu huynh":phuhuynh,"Thong tin sinh vien":sinhvien,"Danh sach mon hoc":lopmonhocc})
     return app.response_class(
         response=converted_students,
         status=200,
         mimetype='application/json'    
     )
+@app.route('/thongtindiemdanh/<MaPH>/',methods= ['GET','POST'])
+def dssinhviendiemdanh1(MaPH):
+    for sv1 in PhuHuynh_collection.find({"MaPH":MaPH}):
+        dssv = Diemdanh_colection.find({"MaSV":sv1["MaSV"]})
+        converted_students = json_util.dumps({"Thong tin sinh vien":dssv})
+        return app.response_class(
+            response=converted_students,
+            status=200,
+            mimetype='application/json'    
+        )
 # @app.route('/date/<date>',methods= ['GET','POST'])
 # def get_date(date):
 #     try:
@@ -163,7 +187,7 @@ def confirm4():
     
     return convertedd, 200, {'Content-Type': 'application/json'}
 
-@app.route('/confirm2',methods= ['GET','POST'])    
+@app.route('/confirm2',methods= ['POST'])    
 def get_img_to_check_attendance():
     global abc
     global convertedd
@@ -175,22 +199,7 @@ def get_img_to_check_attendance():
     photo_name = tenanh.get("photo_name")
     print(">>>photo_name",photo_name)
     try:
-        url = './api/data_embeddings.npz'
-        data = load(url)
-        print(">>>",data)
-        faces, labels = data['arr_0'], data['arr_1']
-        # print(f'>>> Dataset: train={faces.shape[0]}')
-        # model, out_encoder = train_model(faces, labels)
-        # in_encoder = Normalizer(norm ='l2')
-        # faces = in_encoder.transform(faces)
-        out_encoder = LabelEncoder()
-        out_encoder.fit(labels)
-
-        # print(labels, type(labels))
-
-        labels = out_encoder.transform(labels)
-        with open('./api/faces_classification.pkl',  'rb') as file:
-            model = pickle.load(file)
+        
         # with open('faces_classification.pkl',  'wb') as file:
         #     pickle.dump(model,file)
         print(labels)
@@ -225,7 +234,7 @@ def get_img_to_check_attendance():
             khoang_cach_thoi_gian = thoi_gian_can_so_sanh - thoi_gian_hien_tai
             so_giay = int(khoang_cach_thoi_gian.total_seconds())
         print("Thời gian (số giây):", so_giay)
-        if class_probability >= 60:
+        if class_probability >= 80:
             for a in list(Diemdanh_colection.find({"MaSV":predict_name[0]})):
                 if thoi_gian_hien_tai.date() == a["Thoi gian diem danh"].date():
                     convertedd = json_util.dumps({"attendance":True,
@@ -245,10 +254,27 @@ def get_img_to_check_attendance():
         convertedd = json_util.dumps({"attendance":False}) 
         return convertedd, 200, {'Content-Type': 'application/json'} 
         print("fgfdgfdgdfgfd")
+        
     except:
         convertedd = json_util.dumps({"attendance":False}) 
         return convertedd, 200, {'Content-Type': 'application/json'} 
 if __name__ == "__main__":
+    url = './api/data_embeddings.npz'
+    data = load(url)
+    print(">>>",data)
+    faces, labels = data['arr_0'], data['arr_1']
+    # print(f'>>> Dataset: train={faces.shape[0]}')
+    # model, out_encoder = train_model(faces, labels)
+    # in_encoder = Normalizer(norm ='l2')
+    # faces = in_encoder.transform(faces)
+    out_encoder = LabelEncoder()
+    out_encoder.fit(labels)
+
+    # print(labels, type(labels))
+
+    labels = out_encoder.transform(labels)
+    with open('./api/faces_classification.pkl',  'rb') as file:
+        model = pickle.load(file)
     app.run(debug=True, host = "0.0.0.0")
     
 
