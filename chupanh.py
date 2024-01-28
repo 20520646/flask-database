@@ -2,7 +2,8 @@ import cv2
 from time import sleep
 count = 51
 cap = cv2.VideoCapture(0)
-while  count <= 100:
+limit = 100
+while  count <= limit:
     ret, frame =  cap.read()
     key = cv2.waitKey(10)
     # tempo = float(1)
