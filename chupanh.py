@@ -4,6 +4,7 @@ count = 51
 cap = cv2.VideoCapture(0)
 limit = 100
 name = "Nam"
+_type = 'train'
 while  count <= limit:
     ret, frame =  cap.read()
     key = cv2.waitKey(10)
@@ -16,7 +17,7 @@ while  count <= limit:
     # print("1")
     if not ret or key == ord('q'):
         break
-    cv2.imwrite(f'train/{name}/{count}.jpg', frame)
+    cv2.imwrite(f'{_type}/{name}/{count}.jpg', frame)
     sleep(1)
     cv2.imshow(f'{count}',frame)
     print(count)
